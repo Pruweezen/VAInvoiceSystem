@@ -27,11 +27,28 @@ public class Main {
     public static void addServiceToInvoice(){
 
     }
+    //Add update hours of servoves in an Invoice
     public static void updateInvoiceServicesHours(){
 
     }
+    //Delete an Invoice
     public static void deleteInvoice(){
 
+    }
+    // view all invoices particular client and total amount for ech invoices
+    public static void viewClientInvoices(){
+
+    }
+    //calculate total income for a given period
+    public static void calculateTotalIncome(){
+
+    }
+     public static void determinedMostPopularServices(){
+         
+     }
+      //top client for a given period
+    public static void determineTopClient(){
+        
     }
     //==================================================================================================================
 
