@@ -9,6 +9,7 @@ public class Main {
     public static final String DB_USER = "fruee";
     public static final String DB_PASSWORD = "1234";
 
+
     // MAIN MENU
     public static void displayMenu() {
         System.out.println("Choose an option:");
@@ -224,15 +225,168 @@ public class Main {
 
 
 
+    //==================================================================================================================
 
 
+    // Method to create a new invoice
+    public static void createInvoice() {
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("Enter client ID for the new invoice:");
+        int clientId = scanner.nextInt();
+        // Additional invoice details can be added here as per requirement
+        // Insert the new invoice into the database
+        try (Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
+             PreparedStatement stmt = conn.prepareStatement("INSERT INTO invoices (client_id) VALUES (?)")) {
+            stmt.setInt(1, clientId);
+            int rowsAffected = stmt.executeUpdate();
+            if (rowsAffected > 0) {
+                System.out.println("Invoice created successfully.");
+            } else {
+                System.out.println("Failed to create invoice.");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
 
+    // Invoice:add
+    public static void addServiceToInvoice() {
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("Enter invoice ID to add service:");
+        int invoiceId = scanner.nextInt();
+        System.out.println("Enter service ID to add:");
+        int serviceId = scanner.nextInt();
+        System.out.println("Enter hours billed for the service:");
+        double hoursBilled = scanner.nextDouble();
+
+        // Add service to the invoice in the database
+        try (Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
+             PreparedStatement stmt = conn.prepareStatement("INSERT INTO invoice_services (invoice_id, service_id, hours_billed) VALUES (?, ?, ?)")) {
+            stmt.setInt(1, invoiceId);
+            stmt.setInt(2, serviceId);
+            stmt.setDouble(3, hoursBilled);
+            int rowsAffected = stmt.executeUpdate();
+            if (rowsAffected > 0) {
+                System.out.println("Service added to invoice successfully.");
+            } else {
+                System.out.println("Failed to add service to invoice.");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    // Invoice: update
+    public static void updateServiceHours() {
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("Enter invoice ID to update service hours:");
+        int invoiceId = scanner.nextInt();
+        System.out.println("Enter service ID to update:");
+        int serviceId = scanner.nextInt();
+        System.out.println("Enter new hours billed for the service:");
+        double newHoursBilled = scanner.nextDouble();
+        // Update service hours in the invoice in the database
+        try (Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
+             PreparedStatement stmt = conn.prepareStatement("UPDATE invoice_services SET hours_billed = ? WHERE invoice_id = ? AND service_id = ?")) {
+            stmt.setDouble(1, newHoursBilled);
+            stmt.setInt(2, invoiceId);
+            stmt.setInt(3, serviceId);
+            int rowsAffected = stmt.executeUpdate();
+            if (rowsAffected > 0) {
+                System.out.println("Service hours updated successfully.");
+            } else {
+                System.out.println("Failed to update service hours.");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    // Invoice:delete
+    public static void deleteInvoice() {
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("Enter invoice ID to delete:");
+        int invoiceId = scanner.nextInt();
+
+        // Delete related records first
+        deleteRelatedRecords(invoiceId);
+
+        // Delete the invoice from the database
+        try (Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
+             PreparedStatement stmt = conn.prepareStatement("DELETE FROM invoices WHERE invoice_id = ?")) {
+            stmt.setInt(1, invoiceId);
+            int rowsAffected = stmt.executeUpdate();
+            if (rowsAffected > 0) {
+                System.out.println("Invoice deleted successfully.");
+            } else {
+                System.out.println("No invoice found with the given ID.");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    // Helper method to delete related records
+    private static void deleteRelatedRecords(int invoiceId) {
+        try (Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
+             PreparedStatement stmt = conn.prepareStatement("DELETE FROM invoice_services WHERE invoice_id = ?")) {
+            stmt.setInt(1, invoiceId);
+            stmt.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+
+    // Invoice:view
+    public static void viewInvoicesForClient() {
+        Scanner scanner = new Scanner(System.in);
+        System.out.println("Enter client ID to view invoices:");
+        int clientId = scanner.nextInt();
+        // Query invoices for the given client from the database
+        try (Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
+             PreparedStatement stmt = conn.prepareStatement("SELECT * FROM invoices WHERE client_id = ?");
+             PreparedStatement stmt2 = conn.prepareStatement("SELECT * FROM invoice_services WHERE invoice_id = ?");
+        ) {
+            stmt.setInt(1, clientId);
+            ResultSet rs = stmt.executeQuery();
+
+            // Check if there are no invoices for the given client
+            if (!rs.isBeforeFirst()) {
+                System.out.println("No invoices found for the provided client ID.");
+                return;
+            }
+
+            while (rs.next()) {
+                int invoiceId = rs.getInt("invoice_id");
+                double totalAmount = 0.0;
+                stmt2.setInt(1, invoiceId);
+                ResultSet rs2 = stmt2.executeQuery();
+                while (rs2.next()) {
+                    double hoursBilled = rs2.getDouble("hours_billed");
+                    int serviceId = rs2.getInt("service_id");
+                    // Retrieve service price from services table
+                    PreparedStatement stmt3 = conn.prepareStatement("SELECT price FROM services WHERE service_id = ?");
+                    stmt3.setInt(1, serviceId);
+                    ResultSet rs3 = stmt3.executeQuery();
+                    if (rs3.next()) {
+                        double servicePrice = rs3.getDouble("price");
+                        totalAmount += hoursBilled * servicePrice;
+                    }
+                }
+                System.out.println("Invoice ID: " + invoiceId + ", Total Amount: " + totalAmount);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
 
 
     //==================================================================================================================
-
     public static void main(String[] args) {
-        System.out.println("Successful connection");
+        System.out.println("S H O E  C A R E ");
+        System.out.println("--------------------------------------------------");
         Scanner scanner = new Scanner(System.in);
         int choice = -1;
 
@@ -252,6 +406,7 @@ public class Main {
                     break;
                 case 3:
                     System.out.println("Invoice Management selected.");
+                    invoiceManagementMenu();
                     break;
                 case 4:
                     System.out.println("Analytics selected.");
@@ -302,7 +457,7 @@ public class Main {
         }
     }
 
-    // Service management submenu
+    // Service management menu
     //kulang pa ug total hours billed for each service.
     public static void serviceManagementMenu() {
         Scanner scanner = new Scanner(System.in);
@@ -340,5 +495,50 @@ public class Main {
             }
         }
     }
+
+    // invoice management menu
+    // Invoice Management submenu
+    public static void invoiceManagementMenu() {
+        Scanner scanner = new Scanner(System.in);
+        int choice = -1;
+
+        while (choice != 0) {
+            System.out.println("Invoice Management Menu:");
+            System.out.println("1. Create Invoice");
+            System.out.println("2. Add Service to Invoice");
+            System.out.println("3. Update Service Hours");
+            System.out.println("4. Delete Invoice");
+            System.out.println("5. View Invoices for Client");
+            System.out.println("0. Go back to main menu");
+            System.out.print("Enter your choice: ");
+            choice = scanner.nextInt();
+            scanner.nextLine(); // Consume newline character
+
+            switch (choice) {
+                case 1:
+                    createInvoice();
+                    break;
+                case 2:
+                    addServiceToInvoice();
+                    break;
+                case 3:
+                    updateServiceHours();
+                    break;
+                case 4:
+                    deleteInvoice();
+                    break;
+                case 5:
+                    viewInvoicesForClient();
+                    break;
+                case 0:
+                    System.out.println("Returning to main menu...");
+                    break;
+                default:
+                    System.out.println("Invalid choice. Please enter a valid option.");
+            }
+        }
+    }
+
+
 }
 
