@@ -353,5 +353,80 @@ public class Main {
             }
         }
     }
+      // method to Display the invoice management submenu
+    public static void invoiceManagementMenu(){
+        Scanner scanner = new Scanner(System.in);
+        int choice = -1;
+
+        while (choice !=0){
+            System.out.println("Invoice Management Menu:");
+            System.out.println("1. Create New Invoice");
+            System.out.println("2. Add Service to Invoice");
+            System.out.println("3. Update Hours of Service in Invoice");
+            System.out.println("4. Delete Invoice");
+            System.out.println("5. View Invoices for a Client");
+            System.out.println("0. Go back to main menu");
+            System.out.print("Enter your choice: ");
+            choice = scanner.nextInt();
+            scanner.nextLine(); // Consume newline character
+
+            switch (choice) {
+                case 1:
+                    addInvoice();
+                    break;
+                case 2:
+                    addServiceToInvoice();
+                    break;
+                case 3:
+                    updateInvoiceServiceHours();
+                    break;
+                case 4:
+                    deleteInvoice();
+                    break;
+                case 5:
+                    viewClientInvoices();
+                    break;
+                case 0:
+                    System.out.println("Returning to main menu...");
+                    break;
+                default:
+                    System.out.println("Invalid choice. Please enter a valid option.");
+        }
+    }
 }
+    // Method to display the analytics submenu
+    public static void analyticsMenu() {
+        Scanner scanner = new Scanner(System.in);
+        int choice = -1;
+
+        while (choice != 0) {
+            System.out.println("Analytics Menu:");
+            System.out.println("1. Calculate Total Income for a Given Period");
+            System.out.println("2. Determine Most Popular Service for a Given Period");
+            System.out.println("3. Determine Top Client for a Given Period");
+            System.out.println("0. Go back to main menu");
+            System.out.print("Enter your choice: ");
+            choice = scanner.nextInt();
+            scanner.nextLine(); // Consume newline character
+
+            switch (choice) {
+                case 1:
+                    calculateTotalIncome();
+                    break;
+                case 2:
+                    determineMostPopularService();
+                    break;
+                case 3:
+                    determineTopClient();
+                    break;
+                case 0:
+                    System.out.println("Returning to main menu...");
+                    break;
+                default:
+                    System.out.println("Invalid choice. Please enter a valid option.");
+            }
+        }
+    }
+}
+
 
