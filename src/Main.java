@@ -1,6 +1,6 @@
 import java.sql.*;
 import java.util.Scanner;
-
+import java.sql.Statement;
 import static java.sql.DriverManager.getConnection;
 
 public class Main {
@@ -357,7 +357,7 @@ public class Main {
                     invoiceManagementMenu();
                     break;
                 case 4:
-                    System.out.println("Analytics selected.");
+                    viewAnalytics();
                     break;
                 case 0:
                     System.out.println("Exiting...");
@@ -370,6 +370,7 @@ public class Main {
         scanner.close();
     }
 
+    //==================================================================================================================
     // client management submenu
     public static void clientManagementMenu() {
         //kulang pa nig isa ka column for amount billed
@@ -404,7 +405,7 @@ public class Main {
             }
         }
     }
-
+    //==================================================================================================================
     // Service management submenu
     //kulang pa ug total hours billed for each service.
     public static void serviceManagementMenu() {
@@ -443,6 +444,8 @@ public class Main {
             }
         }
     }
+
+    //==================================================================================================================
     // Add invoice management submenu
     public static void invoiceManagementMenu() {
         Scanner scanner = new Scanner(System.in);
@@ -502,5 +505,34 @@ public class Main {
             }
         }
     }
+    //==================================================================================================================
+    public static void viewAnalytics() {
+        try (Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery("SELECT * FROM analytics")) {
+
+            System.out.println("Analytics Table:");
+            System.out.println("-------------------------------------------------------------------------------------------------------------------------");
+            System.out.printf("| %-10s | %-12s | %-12s | %-15s | %-30s | %-20s |\n",
+                    "Analytics ID", "Start Date", "End Date", "Total Income", "Most Popular Service", "Top Client");
+            System.out.println("-------------------------------------------------------------------------------------------------------------------------");
+
+            while (rs.next()) {
+                int analyticsId = rs.getInt("analytics_id");
+                Date startDate = rs.getDate("start_date");
+                Date endDate = rs.getDate("end_date");
+                double totalIncome = rs.getDouble("total_income");
+                String mostPopularService = rs.getString("most_popular_service");
+                String topClient = rs.getString("top_client");
+
+                System.out.printf("| %-12d | %-12s | %-12s | %-15.2f | %-30s | %-20s |\n",
+                        analyticsId, startDate, endDate, totalIncome, mostPopularService, topClient);
+            }
+            System.out.println("-------------------------------------------------------------------------------------------------------------------------");
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
 }
+
 
