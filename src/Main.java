@@ -19,7 +19,20 @@ public class Main {
         System.out.println("0. Exit");
         System.out.print("Enter your choice: ");
     }
+   // Add new Invoice
+    public static void addInvoice(){
 
+    }
+    //Add service to an Invoice
+    public static void addServiceToInvoice(){
+
+    }
+    public static void updateInvoiceServicesHours(){
+
+    }
+    public static void deleteInvoice(){
+
+    }
     //==================================================================================================================
 
     // Client Management: Add a new client
