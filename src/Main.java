@@ -303,6 +303,7 @@ public class Main {
     }
 
     // Service management submenu
+    //kulang pa ug total hours billed for each service.
     public static void serviceManagementMenu() {
         Scanner scanner = new Scanner(System.in);
         int choice = -1;
