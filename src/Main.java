@@ -59,42 +59,44 @@ public class Main {
             }
 
             System.out.println("List of Clients:");
-            System.out.println("Name\t\tEmail\t\tPhone Number\tAddress");
-            System.out.println("-----------------------------------------------------");
+            System.out.println("-------------------------------------------------------------------------------------------------------------------------");
+            System.out.printf("| %-5s | %-20s | %-30s | %-15s | %-40s |\n", "client_id", "Name", "Email", "Phone Number", "Address");
+            System.out.println("-------------------------------------------------------------------------------------------------------------------------");
             while (rs.next()) {
+                int id = rs.getInt("client_id");
                 String name = rs.getString("name");
                 String email = rs.getString("email");
                 String phone = rs.getString("phone");
                 String address = rs.getString("address");
 
-                System.out.println(name + "\t\t" + email + "\t\t" + phone + "\t" + address);
+                System.out.printf("| %-5d | %-20s | %-30s | %-15s | %-40s |\n", id, name, email, phone, address);
             }
+            System.out.println("-------------------------------------------------------------------------------------------------------------------------");
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
 
 
-
-    // Client Management: Delete an existing client
     public static void deleteClient() {
         Scanner scanner = new Scanner(System.in);
         System.out.println("Enter Client ID to delete:");
-        int clientId = scanner.nextInt();
+        int client_Id = scanner.nextInt();
 
         try (Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
-             PreparedStatement stmt = conn.prepareStatement("DELETE FROM clients WHERE id = ?")) {
-            stmt.setInt(1, clientId);
+             PreparedStatement stmt = conn.prepareStatement("DELETE FROM clients WHERE client_1id = ?")) {
+            stmt.setInt(1, client_Id);
             int rowsAffected = stmt.executeUpdate();
             if (rowsAffected > 0) {
-                System.out.println("Client with ID " + clientId + " deleted successfully.");
+                System.out.println("client_id " + client_Id + " deleted successfully.");
             } else {
-                System.out.println("No client found with ID " + clientId);
+                System.out.println("No client found with ID " + client_Id);
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
+
 
 
 
