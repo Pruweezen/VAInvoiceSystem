@@ -418,7 +418,7 @@ public class Main {
     //==================================================================================================================
 
     public static void main(String[] args) {
-        System.out.println("-S H O E C A R E M A N A G E M E N T S Y S T E M-");
+        System.out.println("-S H O E  C A R E  M A N A G E M E N T  S Y S T E M-");
         Scanner scanner = new Scanner(System.in);
         int choice = -1;
 
@@ -485,7 +485,6 @@ public class Main {
     //==================================================================================================================
     // client management submenu
     public static void clientManagementMenu() {
-        //kulang pa nig isa ka column for amount billed
         Scanner scanner = new Scanner(System.in);
         int choice = -1;
 
@@ -529,7 +528,6 @@ public class Main {
     }
     //==================================================================================================================
     // Service management submenu
-    //kulang pa ug total hours billed for each service.
     public static void serviceManagementMenu() {
         Scanner scanner = new Scanner(System.in);
         int choice = -1;
