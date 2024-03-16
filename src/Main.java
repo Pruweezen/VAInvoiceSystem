@@ -79,6 +79,55 @@ public class Main {
         }
     }
 
+    // Client Management: Update client details
+    public static void updateClient(int clientId) {
+        Scanner scanner = new Scanner(System.in);
+
+        try (Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD)) {
+            // Check if the client exists
+            PreparedStatement checkStmt = conn.prepareStatement("SELECT * FROM clients WHERE client_id = ?");
+            checkStmt.setInt(1, clientId);
+            ResultSet rs = checkStmt.executeQuery();
+
+            if (!rs.isBeforeFirst()) {
+                System.out.println("No client found with ID " + clientId);
+                rs.close(); // Close the result set before returning
+                return;
+            }
+
+            // Client exists, prompt for new details
+            System.out.println("Enter new client details:");
+            System.out.print("Client Name: ");
+            String clientName = scanner.nextLine();
+            System.out.print("Email: ");
+            String email = scanner.nextLine();
+            System.out.print("Phone Number: ");
+            String phoneNumber = scanner.nextLine();
+            System.out.print("Address: ");
+            String address = scanner.nextLine();
+
+            // Update the client
+            PreparedStatement updateStmt = conn.prepareStatement("UPDATE clients SET name = ?, email = ?, phone = ?, address = ? WHERE client_id = ?");
+            updateStmt.setString(1, clientName);
+            updateStmt.setString(2, email);
+            updateStmt.setString(3, phoneNumber);
+            updateStmt.setString(4, address);
+            updateStmt.setInt(5, clientId);
+            int rowsAffected = updateStmt.executeUpdate();
+
+            if (rowsAffected > 0) {
+                System.out.println("Client with ID " + clientId + " updated successfully.");
+            } else {
+                System.out.println("Failed to update client with ID " + clientId);
+            }
+
+            rs.close(); // Close the result set after updating the client
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+
 
     //Client Management : delete a client
     public static void deleteClient() {
@@ -100,10 +149,40 @@ public class Main {
         }
     }
 
+    public static void totalAmountEachClientBilled() {
+        try (Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
+             PreparedStatement stmt = conn.prepareStatement("SELECT c.client_id, c.name, SUM(s.price * i.hours_billed) AS total_amount " +
+                     "FROM clients c " +
+                     "JOIN invoices inv ON c.client_id = inv.client_id " +
+                     "JOIN invoice_services i ON inv.invoice_id = i.invoice_id " +
+                     "JOIN service_management s ON i.service_id = s.service_id " +
+                     "GROUP BY c.client_id, c.name")) {
+
+            ResultSet rs = stmt.executeQuery();
+
+            System.out.println("Total Amount Billed for Each Client:");
+            System.out.println("-------------------------------------");
+            System.out.printf("| %-10s | %-20s | %-15s |\n", "Client ID", "Name", "Total Amount");
+            System.out.println("-------------------------------------");
+
+            while (rs.next()) {
+                int clientId = rs.getInt("client_id");
+                String clientName = rs.getString("name");
+                double totalAmount = rs.getDouble("total_amount");
+
+                System.out.printf("| %-10d | %-20s | %-15.2f |\n", clientId, clientName, totalAmount);
+            }
+
+            System.out.println("-------------------------------------");
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
     //==================================================================================================================
 
-  //Service Management: add service
-  public static void addService() {
+    //Service Management: add service
+    public static void addService() {
         Scanner scanner = new Scanner(System.in);
         System.out.println("Enter service details:");
         System.out.print("Service Name: ");
@@ -158,8 +237,8 @@ public class Main {
         }
     }
 
-   //Service Management: delete service
-   public static void deleteService() {
+    //Service Management: delete service
+    public static void deleteService() {
         Scanner scanner = new Scanner(System.in);
         System.out.println("Enter Service ID to delete:");
         int serviceId = scanner.nextInt();
@@ -324,9 +403,14 @@ public class Main {
                 System.out.println("Invoice ID: " + invoiceId + ", Total Amount: " + totalAmount);
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            if (e instanceof SQLSyntaxErrorException) {
+                System.err.println("Error: Table 'invoice_services' or 'services' doesn't exist.");
+            } else {
+                e.printStackTrace();
+            }
         }
     }
+
 
 
 
@@ -334,7 +418,7 @@ public class Main {
     //==================================================================================================================
 
     public static void main(String[] args) {
-        System.out.println("Successful connection");
+        System.out.println("-S H O E C A R E M A N A G E M E N T S Y S T E M-");
         Scanner scanner = new Scanner(System.in);
         int choice = -1;
 
@@ -370,6 +454,34 @@ public class Main {
         scanner.close();
     }
 
+
+    public static void viewTotalHoursBilledforEachService() {
+        try (Connection conn = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery("SELECT s.service_id, s.service_name, SUM(i.hours_billed) AS total_hours_billed " +
+                     "FROM service_management s " +
+                     "JOIN invoice_services i ON s.service_id = i.service_id " +
+                     "GROUP BY s.service_id, s.service_name")) {
+
+            System.out.println("Total Hours Billed for Each Service:");
+            System.out.println("-------------------------------------");
+            System.out.printf("| %-10s | %-30s | %-20s |\n", "Service ID", "Service Name", "Total Hours Billed");
+            System.out.println("-------------------------------------");
+
+            while (rs.next()) {
+                int serviceId = rs.getInt("service_id");
+                String serviceName = rs.getString("service_name");
+                double totalHoursBilled = rs.getDouble("total_hours_billed");
+
+                System.out.printf("| %-10d | %-30s | %-20.2f |\n", serviceId, serviceName, totalHoursBilled);
+            }
+
+            System.out.println("-------------------------------------");
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
     //==================================================================================================================
     // client management submenu
     public static void clientManagementMenu() {
@@ -382,6 +494,8 @@ public class Main {
             System.out.println("1. Add Client");
             System.out.println("2. Delete Client");
             System.out.println("3. View Clients");
+            System.out.println("4.Total Amount Each Client Billed");
+            System.out.println("5.Update Client");
             System.out.println("0. Go back to main menu");
             System.out.print("Enter your choice: ");
             choice = scanner.nextInt();
@@ -396,6 +510,14 @@ public class Main {
                     break;
                 case 3:
                     viewClients();
+                    break;
+                case 4:
+                    totalAmountEachClientBilled();
+                    break;
+                case 5:
+                    System.out.println("Enter client ID to update:");
+                    int updateClientId = scanner.nextInt();
+                    updateClient(updateClientId);
                     break;
                 case 0:
                     System.out.println("Returning to main menu...");
@@ -418,6 +540,7 @@ public class Main {
             System.out.println("2. View Services");
             System.out.println("3. Update Service");
             System.out.println("4. Delete Service");
+            System.out.println("5. View Total Hours Billed for Each Service");
             System.out.println("0. Go back to main menu");
             System.out.print("Enter your choice: ");
             choice = scanner.nextInt();
@@ -435,6 +558,9 @@ public class Main {
                     break;
                 case 4:
                     deleteService();
+                    break;
+                case 5:
+                    viewTotalHoursBilledforEachService();
                     break;
                 case 0:
                     System.out.println("Returning to main menu...");
@@ -534,5 +660,3 @@ public class Main {
         }
     }
 }
-
-
